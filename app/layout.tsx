@@ -15,37 +15,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LanguageProvider, useTranslation } from '../src/i18n/LanguageContext'; 
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 function LayoutContent({ children }: RootLayoutProps) {
-  const { data: session } = useSession(); 
+  const { data: session } = useSession();
+  const { lang, setLang, t } = useTranslation(); // Получаем язык, setLang и переводчик
 
   const [open, setOpen] = useState(false);
   const [activeButton, setActiveButton] = useState<string | null>(null);
   const router = useRouter();
 
   const buttons = ['/home.svg', '/search.svg', '/activiti.svg', '/like.svg', '/profile.svg'];
+
   const handleButtonClick2 = () => {
     if (session) {
       setOpen(true);
-     } else{
+    } else {
       router.push('/api/auth/signin');
-     }
-  }
+    }
+  };
+
   const handleButtonClick = (src: string) => {
     if (src === '/activiti.svg') {
-     if (session) {
-      setOpen(true);
-     } else{
-      router.push('/api/auth/signin');
-     }
+      if (session) {
+        setOpen(true);
+      } else {
+        router.push('/api/auth/signin');
+      }
     } else if (src === '/profile.svg') {
       if (session) {
         setActiveButton(src);
-      
       } else {
         router.push('/api/auth/signin');
       }
@@ -57,6 +60,11 @@ function LayoutContent({ children }: RootLayoutProps) {
     }
   };
 
+  const changeLanguage = (newLang: 'ru' | 'tj') => {
+    setLang(newLang);
+    localStorage.setItem('lang', newLang);
+  };
+
   return (
     <div className="flex min-h-screen">
       <aside className="w-20 bg-black p-4 flex flex-col items-center justify-between py-5">
@@ -66,7 +74,6 @@ function LayoutContent({ children }: RootLayoutProps) {
         <nav className="flex flex-col gap-2 items-center">
           {buttons.map((src, idx) => {
             const isProfile = src === '/profile.svg';
-
             return (
               <button
                 key={idx}
@@ -97,11 +104,11 @@ function LayoutContent({ children }: RootLayoutProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-[#181818] text-white border border-gray-700 w-[350px] h-[450px] pl-3 pr-3 pt-3">
-              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">Для вас</DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">Подписки</DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">Вы поставили нравиться</DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">Сохраненные</DropdownMenuItem>
-              <DropdownMenuItem className="hover:text-red-500 hover:bg-[#212121] h-[50px] text-xl">Поиск</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">{t('for_you')}</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">{t('subscriptions')}</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">{t('liked')}</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">{t('saved')}</DropdownMenuItem>
+              <DropdownMenuItem className="hover:text-red-500 hover:bg-[#212121] h-[50px] text-xl">{t('search')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -112,12 +119,24 @@ function LayoutContent({ children }: RootLayoutProps) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-[#181818] text-white border border-gray-700 w-[300px] h-[300px] pl-3 pr-3 pt-3">
-              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">Настройки</DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-[#212121] h-[50px] text-xl">{t('settings')}</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => changeLanguage('ru')}
+                className="hover:bg-[#212121] h-[50px] text-xl"
+              >
+                {t('russian')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => changeLanguage('tj')}
+                className="hover:bg-[#212121] h-[50px] text-xl"
+              >
+                {t('tajik')}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => signOut()}
                 className="text-red-400 hover:text-red-500 hover:bg-[#212121] h-[50px] text-xl cursor-pointer"
               >
-                Выйти
+                {t('logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -129,11 +148,11 @@ function LayoutContent({ children }: RootLayoutProps) {
       </div>
 
       <button
-  className="fixed bottom-4 bg-[#181818] right-4 hover:scale-110 transition-transform duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 p-1 h-18 w-20 flex items-center justify-center rounded-[10px]"
-  onClick={handleButtonClick2}  
->
-  <Image src="/activiti.svg" alt="Activity Icon" width={35} height={35} />
-</button>
+        className="fixed bottom-4 bg-[#181818] right-4 hover:scale-110 transition-transform duration-200 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500 p-1 h-18 w-20 flex items-center justify-center rounded-[10px]"
+        onClick={handleButtonClick2}
+      >
+        <Image src="/activiti.svg" alt="Activity Icon" width={35} height={35} />
+      </button>
 
       <ModalPost isOpen={open} onClose={() => setOpen(false)} />
     </div>
@@ -142,16 +161,18 @@ function LayoutContent({ children }: RootLayoutProps) {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html lang="tj">
       <head>
-        <title>Главная . Threads</title>
+        <title>home . Threads</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Описание сайта" />
         <meta name="theme-color" content="#181818" />
       </head>
       <body className="bg-black">
         <SessionProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <LanguageProvider>
+            <LayoutContent>{children}</LayoutContent>
+          </LanguageProvider>
         </SessionProvider>
       </body>
     </html>

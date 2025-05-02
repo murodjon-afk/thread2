@@ -1,12 +1,15 @@
-// app/page.tsx (серверный компонент)
 import Image from "next/image";
 import Post from "@/components/posts";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../lib/authOptions"; // или путь к твоим настройкам
+import { authOptions } from "../lib/authOptions"; 
 import ClientCreatePost from "../components/client-create-post";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
+ 
+const t = "some value";
+
+
 
   return (
     <div className="h-[100vh] w-[100%] flex items-center justify-center flex-col">
@@ -17,7 +20,7 @@ export default async function Home() {
             <>
               <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center">
                 <Image
-                  src={session.user.image || "/profile.svg"}
+                  src={ "/profile.svg"}
                   alt="User"
                   width={60}
                   height={60}
